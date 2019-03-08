@@ -1,37 +1,42 @@
-/// <reference path="./coin.ts" />
+/// <reference path="./coin.ts" /> Because requirejs module loeader loads with:
+import * as Coins from "./coin"
+import getVendingProduct from "./productFactory"
+import {Product, Initial as Init } from "./product"
 /// <reference path="typings/knockout.d.ts" /> Not needed because tsc automatically finds and uses them as along
 /// as they are in the project directory structure
+
 /// <reference path="./product.ts" />
 /// <reference path="./productFactory.ts" />
 
 
-enum VendingMachineSize {
+
+export enum VendingMachineSize {
     small = 6,
     medium = 9,
     large = 12
 }
 
 class Cell {
-    constructor(public product: CocaCola) {
+    constructor(public product: Product) {
 
     }
 
-    stock = ko.observable(3);
-    sold = ko.observable(false);
+    stock = ko.observable<number>(3);
+    sold = ko.observable<boolean>(false);
 }
 
-class VendingMachine {
+export class VendingMachine {
     paid = ko.observable(0);
-    selectedCell = ko.observable(new Cell(new CocaCola));
+    selectedCell = ko.observable(new Cell(new Init));
     cells = ko.observableArray();
-    acceptedCoins: Quarter[] = [new Quarter()];
+    acceptedCoins: Coins.Coin[] = [new Coins.Dime(), new Coins.Quarter(), new Coins.Half(), new Coins.Dollar()];
     canPay = ko.pureComputed(() => this.paid() - this.selectedCell().product.price >= 0);
 
     set size(givenSize: VendingMachineSize) {
         this.cells([]);
 
         for (let index = 0; index < givenSize; index++) {
-            let product = productFactory.GetProduct();
+            let product = getVendingProduct();
             this.cells.push(new Cell(product));
         }
     }
@@ -43,10 +48,10 @@ class VendingMachine {
 
     //In arrow functions this refers to the object of the class the function is in
     //while in non-arrow function will point to the object that is calling the function (window object)
-    acceptCoin = (coin: Quarter): void => {
+    acceptCoin = (coin: Coins.Coin): void => {
         let oldTotal = this.paid();
         this.paid(oldTotal);
-        this.paid(oldTotal + coin.Value);
+        this.paid(oldTotal + coin.value);
     }
 
     pay = (): void => {

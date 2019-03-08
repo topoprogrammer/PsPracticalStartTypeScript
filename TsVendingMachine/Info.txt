@@ -1,2 +1,1 @@
-Module 3. Understanding the Language Basics.
-Chapter 7. Enums.
+Finished Project.
